@@ -1,0 +1,18 @@
+1. Clone <Repo Address> https://github.com/nightmareteam/content.git
+    1.a Checkout branch "psqldb".
+
+2. Locate seeding script:
+    2.a /sdc/psql/newSeed.js
+
+3. Locate DB Schema:
+    3.a /sdc/psql/schema.sql
+
+4. Upon succesesful generation of Seed.
+    4.a Run cmd to access my DB instance
+        $ psql -h 54.218.47.107 -U vapor -d vapordb -p 5432 
+    4.b Upload schema 
+        $ \i schema.sql
+5. Seed DB 
+    5.a \COPY games (gameid, name, description, head_url, release_month, release_year, developer, publisher, negative_review_count, positive_review_count, recent_negative_count, recent_positive_count, media_video) 
+FROM 'game-reviews.csv' DELIMITER '|' ;
+    
