@@ -1,162 +1,28 @@
+require('newrelic');
 const express = require('express');
 const app = express();
-const request = require('request');
+const rp = require('request-promise');
+const DOMAIN = require('../config/configServer')
+const path = require('path');
 
-app.use(express.static('public'));
-/*port 3001*/
-app.get('/game', (req, res) => {
-  request("http://localhost:3002/game", (err, response, body) => {
-    if(err) {
-      res.status(400);
-      res.send(err);
-    } else {
-      res.status(200);
-      res.send(body);
-    }
-  });
-});
+app.use('/:id([0-9]*)', express.static(path.resolve(__dirname, '..', 'public')));
 
-/*port 3002*/
-app.get('/games/:uid', (req, res) => {
-  request("http://localhost:3002/games/"+ req.params.uid, (err, response, body) => {
-    if(err) {
-      res.status(400);
-      res.send(err);
-    } else {
-      res.status(200);
-      res.send(body);
-    }
-  });
-});
+/*
+ app.get('/content/:id', (req, res) => {
+  const  gameId  = req.params.id
+   rp(`http://34.221.201.10:3002/content/${gameId}`)
+   .then((gameData)=> res.send(JSON.parse(gameData)))
+   .catch((err)=>console.err('err:', err));
+   });
+*/
 
-app.get('/screenshots', (req, res) => {
-  request("http://localhost:3002/screenshots", (err, response, body) => {
-    if(err) {
-      res.status(400);
-      res.send(err);
-    } else {
-      res.status(200);
-      res.send(body);
-    }
-  });
-});
+ app.get('/:service/:id', (req, res) => {
+    const  service  = req.params.service;
+    const  gameId  = req.params.id
+     rp(`${DOMAIN[service]}/${service}/${gameId}`)
+     .then((gameData)=> res.send(JSON.parse(gameData)))
+     .catch((err)=>console.log('err:', err));
+     });
 
-app.get('/videos', (req, res) => {
-  request("http://localhost:3002/videos", (err, response, body) => {
-    if(err) {
-      res.status(400);
-      res.send(err);
-    } else {
-      res.status(200);
-      res.send(body);
-    }
-  });
-});
-
-// ERIC'S APIS
-app.get('/reviews', (req, res) => {
-  console.log('TRYING TO GET REVIEWS');
-  let options = {
-    url: 'http://localhost:3005/reviews',
-    json: true,
-    body: req.query
-  };
-
-  request(options, function(error, response, body) {
-    if (error) { console.error('Could not get reviews data', error); }
-    console.log('Type of reviews object is ' + typeof body);
-    res.send(body);
-  });
-});
-
-app.get('/recent', (req, res) => {
-  console.log('TRYING TO GET RECENT');
-  let options = {
-    url: 'http://localhost:3005/recent',
-    json: true,
-    body: req.query
-  };
-  
-  request(options, function(error, response, body) {
-    if (error) { console.error('Could not get reviews data', error); }
-    console.log('Type of reviews object is ' + typeof body);
-    res.send(body);
-  });
-});
-
-app.post('/review/vote', (req, res) => {
-  const data = {
-    post_id: req.body.post_id,
-    helpfulness: req.body.helpfulness
-  };
-
-  const options = {
-    url: 'http://localhost:3005/review/vote',
-    method: 'POST',
-    json: true,
-    form: data
-  };
-
-  request(options , function(error, response, body) {
-    if (error) { console.error('Could not get reviews data', error); }
-    console.log('Type of reviews object is ' + typeof body);
-    res.send(body);
-  });
-});
-
-app.get('/reviews/filters', (req, res) => {
-  request('http://localhost:3005/reviews/filters', function(error, response, body) {
-    if (error) { console.error('Could not get languages', error); }
-    res.send(JSON.parse(body));
-  });
-});
-
-app.get('/reviews/comments', (req, res) => {
-  console.log('TRYING TO GET COMMENTS');
-  let options = {
-    url: 'http://localhost:3005/reviews/comments',
-    json: true,
-    body: req.query
-  };
-
-  request(options, function(error, response, body) {
-    if (error) { console.error('Could not get reviews data', error); }
-    console.log('Type of reviews object is ' + typeof body);
-    res.send(body);
-  });
-});
-
-app.post('/reviews/comment', (req, res) => {
-  const options = {
-    url: 'http://localhost:3005/reviews/comment',
-    method: 'POST',
-    json: true,
-    form: req.body.data
-  };
-
-  request(options , function(error, response, body) {
-    if (error) { console.error('Could not get reviews data', error); }
-    console.log('Type of reviews object is ' + typeof body);
-    res.send(body);
-  });
-});
-
-app.get('/graphOverall', (req, res) => {
-  request('http://localhost:3005/graphOverall', function(error, response, body) {
-    if (error) { console.error('Could not get graph data', error); }
-    res.send(JSON.parse(body));
-  });
-})
-
-app.get('/graphRecent', (req, res) => {
-  console.log('ROUTE TO ERIC');
-  request('http://localhost:3005/graphRecent', function(error, response, body) {
-    if (error) { console.error('Could not get graph data', error); }
-    res.send(JSON.parse(body));
-  });
-})
-
-
-app.listen(3000, (req, res) => {
-  console.log('listening to port 3000...');
-})
+app.listen(3000, () => 
+  console.log('listening to port 3000...'));
